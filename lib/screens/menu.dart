@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:weaponry/widgets/left_drawer.dart';
+import 'package:weaponry/widgets/menu_card.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({Key? key}) : super(key: key);
 
   final List<MenuItem> items = [
-    MenuItem("Lihat Item", Icons.checklist, Colors.green),
-    MenuItem("Tambah Item", Icons.add_shopping_cart, Colors.lime),
+    MenuItem("Lihat Senjata", Icons.checklist, const Color.fromRGBO(76, 175, 80, 1)),
+    MenuItem("Tambah Senjata", Icons.add_circle_outline, Colors.lime),
     MenuItem("Logout", Icons.logout, Colors.teal),
   ];
 
@@ -22,13 +24,16 @@ class MyHomePage extends StatelessWidget {
       return Scaffold(
     appBar: AppBar(
       title: const Text(
-        'AgriStock Inventory',
+        'Weapon Inventory',
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-        ),),
+        ),
+      ),
+      foregroundColor: Colors.white,
       backgroundColor: Colors.green,
     ),
+    drawer: const LeftDrawer(),
     body: SingleChildScrollView(
       // Widget wrapper yang dapat discroll
       child: Padding(
@@ -69,58 +74,5 @@ class MyHomePage extends StatelessWidget {
   );
   }
 
-}
-
-class MenuCard extends StatelessWidget {
-  final MenuItem item;
-
-  const MenuCard(this.item, {super.key}); // Constructor
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: item.color,
-      child: InkWell(
-        // Area responsive terhadap sentuhan
-        onTap: () {
-          // Memunculkan SnackBar ketika diklik
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(
-                content: Text("Kamu telah menekan tombol ${item.name}!")));
-        },
-        child: Container(
-          // Container untuk menyimpan Icon dan Text
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  item.icon,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
-                const Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MenuItem {
-  final String name;
-  final IconData icon;
-  final Color color;
-
-  MenuItem(this.name, this.icon, this.color);
 }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:agristock/menu.dart';
+import 'package:weaponry/screens/menu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Agristock Inventory',
+      title: 'Weaponry Inventory',
       theme: ThemeData(
         // This is the theme of your application.
         //
