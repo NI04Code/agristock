@@ -212,7 +212,7 @@ class _WeaponFormPageState extends State<WeaponFormPage> {
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                              final response = await request.postJson(
-                            "http://naufal-ichsan-tugas.pbp.cs.ui.ac.id/create-flutter/",
+                            "https://naufal-ichsan-tugas.pbp.cs.ui.ac.id/create-flutter/",
                             jsonEncode(<String, String>{
                                 'name': _name,
                                 'amount': _amount.toString(),
