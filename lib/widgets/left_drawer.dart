@@ -67,7 +67,7 @@ class LeftDrawer extends StatelessWidget {
               // Bagian redirection ke ShopFormPage
               onTap: () {
                 Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const WeaponListPage()));
+                  MaterialPageRoute(builder: (context) => const WeaponPage()));
               },
             ),
         ],

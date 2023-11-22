@@ -255,8 +255,143 @@ memunculkan data sesuai isi dari formulir yang diisi dalam sebuah pop-up setelah
     ```
 
 
+## PBP TUGAS 9  
+##  Apakah bisa kita melakukan pengambilan data JSON tanpa membuat model terlebih dahulu? Jika iya, apakah hal tersebut lebih baik daripada membuat model sebelum melakukan pengambilan data JSON?   
+Dimungkinkan untuk mengambil data JSON tanpa memerlukan model.
+Dengan "parsing" atau "deserializing" JSON, proses transformasi menjadi struktur data yang dapat digunakan dalam bahasa pemrograman apa pun dilakukan. Hal ini bergantung pada kebutuhan dan kompleksitas data kita. Pendekatan ini lebih efisien bila struktur data JSON sederhana dan dapat digunakan secara langsung  tanpa memerlukan pemodelan tambahan. Namun, jika data kita cukup kompleks atau memerlukan transformasi khusus, disarankan untu membuat model terlebih dahulu.
+
+## Jelaskan fungsi dari CookieRequest dan jelaskan mengapa instance CookieRequest perlu untuk dibagikan ke semua komponen di aplikasi Flutter.
+
+Beberapa fungsi dari CookieRequest menurut saya adalah
+
+1. Menyediakan fungsi untuk inisialisasi sesi, login, dan logout yang memungkinkan aplikasi untuk melacak status login dan sesi pengguna.
+2. Cookies berupa informasi sesi tersebut disimpan secara lokal.
+3. Melakukan permintaan HTTP dengan metode GET dan POST.
+
+CookieRequest perlu dibagikan ke semua komponen di aplikasi Flutter agar status login atau sesi (cookies) konsisten untuk setiap komponen aplikasi. 
+
+## Jelaskan mekanisme pengambilan data dari JSON hingga dapat ditampilkan pada Flutter.   
+1. Membuat model kustom Manfaatkan website Quicktype untuk membuat data JSON yang didapat dari endpoint /json pada tugas Django.
+2. Menambahkan dependensi HTTP Pada proyek Flutter, tambahkan dependensi http dan tambahkan kode <uses-permission android:name="android.permission.INTERNET" /> pada android/app/src/main/AndroidManifest.xml untuk memperbolehkan akses internet.
+3. Melakukan Fetch Data Pada salah satu file lib/screens yang ingin melakukan fetch data, implementasi fungsi asinkronus dan mengirim permintaan HTTP. Contoh pada tugas kali ini,
+
+```dart
+Future<List<Weapon>> fetchWeapon() async {
+    var url = Uri.parse(
+        'https://naufal-ichsan-tugas/json/');
+    var response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+    );
+
+    // melakukan decode response menjadi bentuk json
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+
+    // melakukan konversi data json menjadi object Weapon
+    List<Weapon> listWeapon = [];
+    for (var d in data) {
+        if (d != null) {
+            listWeapon.add(Weapon.fromJson(d));
+        }
+    }
+    return listWeapon;
+}
+```
+4. Menampilkan data dengan menggunakan widget FutureBuilder yang dimonitori nilai future:. Jadi, ketika fungsi fetchWeapon() dipanggil dan sudah selesai melakukan proses, maka snapshot akan berisi list weapons yang di-return pada fungsi tersebut. Setelah itu, snapshot.data ini akan diolah untuk ditampilkan pada ListView.builder.
+
+## Jelaskan mekanisme autentikasi dari input data akun pada Flutter ke Django hingga selesainya proses autentikasi oleh Django dan tampilnya menu pada Flutter.    
+1. User memasukkan username dan password pada laman LoginPage.
+2. Tombol login ditekan dan fungsi login pada CookieRequest terpanggil yang mengirimkan HTTP request dengan endpoint URL auth/login pada proyek Django.
+3. Pada Django, dilakukan autentikasi seperti user = authenticate(username=username, password=password) pada views.py milik authentication.
+4. Setelah itu berlaku pemeriksaan terhadap status user yaitu, user is not None dan user.is_active:?
+5. Kembali ke Flutter, jika request.loggedIn, pengguna diarahkan ke MyHomePage dan muncul tampilan selamat datang dan berhasil login dengan SnackBar.
+
+## Sebutkan seluruh widget yang kamu pakai pada tugas ini dan jelaskan fungsinya masing-masing.
+
+- FutureBuilder: Membangun widget secara async
+- ListView.builder: Membuat daftar yang dapat discroll
+- Stack: Menempatkan widget-widget anak di atas satu sama lain
+- GestureDetector: Mendeteksi gesture. Digunakan untuk membuat teks "Create New Account" dapat diklik.]
+- SizedBox: Menambahkan ruang vertikal
 
 
 
+## Step by Step
+1. Membuat halaman login pada proyek tugas Flutter dan Mengintegrasikan sistem autentikasi Django dengan proyek tugas Flutter.
+    1. Menyiapkan Django App tugas untuk melakukan integrasi autentikasi, Saya membuat aplikasi authentication dan juga meng-install library corsheaders.
+    2. Fungsi login pada views.py Pada aplikasi Django tersebut, saya membuat sebuah fungsi login pada views.py untuk menangani proses autentikasi login dan fungsi logout untuk proses autentikasi logout.
+    3. Menggunakan package pbp_django_auth Install package pbp_django_auth dan modifikasi root widget untuk menyediakan instance CookieRequest dengan semua komponen pada proyek di dalam file main.dart
+    4. Membuat login.dart Buat berkas baru lib/screens/login.dart dan isilah kode untuk menampilkan halaman login seperti pada tutorial 8.
+2. Membuat model kustom sesuai dengan proyek aplikasi Django.
+    1. Membuat model kustom Manfaatkan website Quicktype untuk membuat data JSON yang didapat dari endpoint /json pada tugas Django dan menginisiasinya pada models di flutter seperti pada Mekanisme Pengambilan Data JSON yang dijelaskan diatas.
+3. Membuat halaman yang berisi daftar semua item yang terdapat pada endpoint JSON di Django yang telah kamu deploy.
+    1. Membuat halaman list weapons dengan mekanisme sama seperti saat mengambil data json diatas dengan tampilan design seperti pada tutorial 8.
+4. Membuat halaman detail untuk setiap item yang terdapat pada halaman daftar Item.
+    1. membuat event action ontap apabila container pada list weapons diklik, berikut codenya,
+    ```dart
+    onTap: () { 
+              Navigator.push(context, 
+                MaterialPageRoute(builder: (context) => DetailPage(snapshot.data![index])));
+              },
+    ```
+    2. membuat halaman baru yaitu weapon_details.dart, dengan implementasi sebagai berikut.
+    
+    ```dart
+
+
+    import 'package:flutter/material.dart';
+    import 'package:weaponry/models/weapon.dart';
+
+    class DetailPage extends StatelessWidget {
+
+      final Weapon x;
+
+      const DetailPage(this.x, {super.key});
+
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Detail Senjata'),
+          ),
+          body: Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  x.fields.name,
+                  style: const TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text("Jumlah: ${x.fields.name}"),
+                const SizedBox(height: 10),
+                Text("Jumlah: ${x.fields.amount}"),
+                const SizedBox(height: 10),
+                Text("Atk: ${x.fields.atk}"),
+                const SizedBox(height: 10),
+                Text("CritDmg: ${x.fields.critDmg}"),
+                const SizedBox(height: 10),
+                Text("CritRate: ${x.fields.critRate}"),
+                const SizedBox(height: 10),
+                Text("Deskripsi: ${x.fields.description}"),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Back'),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    
+    ```
 
 

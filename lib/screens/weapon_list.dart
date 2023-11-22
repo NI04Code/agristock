@@ -1,62 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:weaponry/models/weapon.dart'; 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:weaponry/models/weapon.dart';
+import 'package:weaponry/screens/weapon_details.dart';
 import 'package:weaponry/widgets/left_drawer.dart';
 
-class WeaponListPage extends StatelessWidget {
-  const WeaponListPage({super.key});
+class WeaponPage extends StatefulWidget {
+    const WeaponPage({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar Senjata'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      ),
-      drawer: const LeftDrawer(),
-      body: ListView.builder(
-        itemCount: Weapon.weaponList.length,
-        itemBuilder: (context, index) {
-          Weapon currentWeapon = Weapon.weaponList[index];
-          return ListTile(
-            title: Text(currentWeapon.name),
-            subtitle: Text(
-                'Jumlah: ${currentWeapon.amount}\n  Atk: ${currentWeapon.atk}\n '),
-            isThreeLine: true,
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text('Weapon Detail'),
-                    content: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Nama: ${currentWeapon.name}'),
-                          Text('Jumlah Weapon: ${currentWeapon.amount}'),
-                          Text('Atk: ${currentWeapon.atk}'),
-                          Text('Crit Rate: ${currentWeapon.critRate}'),
-                          Text('Crit Dmg: ${currentWeapon.critDmg}'),
-                          Text('Deskripsi: ${currentWeapon.description}'),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Close'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
+    @override
+    _WeaponPageState createState() => _WeaponPageState();
+}
+
+class _WeaponPageState extends State<WeaponPage> {
+Future<List<Weapon>> fetchWeapon() async {
+    var url = Uri.parse(
+        'https://naufal-ichsan-tugas/json/');
+    var response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
     );
-  }
+
+    // melakukan decode response menjadi bentuk json
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+
+    // melakukan konversi data json menjadi object Weapon
+    List<Weapon> listWeapon = [];
+    for (var d in data) {
+        if (d != null) {
+            listWeapon.add(Weapon.fromJson(d));
+        }
+    }
+    return listWeapon;
+}
+
+@override
+Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+        title: const Text('Weapon'),
+        ),
+        drawer: const LeftDrawer(),
+        body: FutureBuilder(
+            future: fetchWeapon(),
+            builder: (context, AsyncSnapshot snapshot) {
+                if (snapshot.data == null) {
+                    return const Center(child: CircularProgressIndicator());
+                } else {
+                    if (!snapshot.hasData) {
+                    return const Column(
+                        children: [
+                        Text(
+                            "Tidak ada data senjata.",
+                            style:
+                                TextStyle(color: Colors.green, fontSize: 20),
+                        ),
+                        SizedBox(height: 8),
+                        ],
+                    );
+                } else {
+                    return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (_, index) => InkWell(
+                          onTap: () { 
+                          Navigator.push(context, 
+                            MaterialPageRoute(builder: (context) => DetailPage(snapshot.data![index])));
+                          },
+                          child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                    Text(
+                                    "${snapshot.data![index].fields.name}",
+                                    style: const TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                    ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text("${snapshot.data![index].fields.amount}"),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                        "${snapshot.data![index].fields.description}")
+                                ],
+                                ),
+                            )));
+                        
+                              
+                    }
+                }
+            }));
+    }
 }

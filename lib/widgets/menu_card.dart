@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:weaponry/screens/weapon_form.dart';
 import 'package:weaponry/screens/weapon_list.dart';
+import 'package:weaponry/screens/login.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class MenuCard extends StatelessWidget {
   final MenuItem item;
@@ -9,11 +12,12 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Material(
       color: item.color,
       child: InkWell(
         // Area responsive terhadap sentuhan
-        onTap: () {
+        onTap: () async {
           // Memunculkan SnackBar ketika diklik
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
@@ -23,9 +27,28 @@ class MenuCard extends StatelessWidget {
             Navigator.push(context,
               MaterialPageRoute(builder: (context) => const WeaponFormPage()));
           }
-          if (item.name == "Lihat Senjata") {
+          else if (item.name == "Lihat Senjata") {
             Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const WeaponListPage()));
+              MaterialPageRoute(builder: (context) => const WeaponPage()));
+          }
+          else if (item.name == "Logout") {
+            final response = await request.logout(
+                "http://naufal-ichsan-tugas.pbp.cs.ui.ac.id/auth/logout/");
+            String message = response["message"];
+            if (response['status']) {
+              String uname = response["username"];
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("$message Sampai jumpa, $uname."),
+              ));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(message),
+              ));
+            }
           }
 
         },

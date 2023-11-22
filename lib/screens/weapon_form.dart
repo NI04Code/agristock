@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:weaponry/screens/menu.dart';
 import 'package:weaponry/widgets/left_drawer.dart';
-import 'package:weaponry/models/weapon.dart';
+
 
 
 
@@ -22,6 +26,7 @@ class _WeaponFormPageState extends State<WeaponFormPage> {
 
     @override
     Widget build(BuildContext context) {
+      final request = context.watch<CookieRequest>();
         return Scaffold(
           appBar: AppBar(
             title: const Center(
@@ -204,43 +209,61 @@ class _WeaponFormPageState extends State<WeaponFormPage> {
                           backgroundColor:
                               MaterialStateProperty.all(Colors.green),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            Weapon newWeapon = Weapon(_name, _amount, _atk, _critRate, _critDmg, _description);
-                            Weapon.weaponList.add(newWeapon);
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text('Produk berhasil tersimpan'),
-                                  content: SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Nama: $_name'),
-                                        Text('Jumlah: $_amount'),
-                                        Text('Atk: $_atk'),
-                                        Text('Crit Rate: $_critRate'),
-                                        Text('Crit Dmg: $_critDmg'),
-                                        Text('Deskripsi: $_description')
-                                        
-                                      ],
+                             final response = await request.postJson(
+                            "http://naufal-ichsan-tugas.pbp.cs.ui.ac.id/create-flutter/",
+                            jsonEncode(<String, String>{
+                                'name': _name,
+                                'amount': _amount.toString(),
+                                'atk' : _atk.toString(),
+                                'critdmg' : _critDmg.toString(),
+                                'critrate' : _critRate.toString(),
+                                'description': _description,
+                            }));
+                            if (response['status'] == 'success') {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Produk berhasil tersimpan'),
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Nama: $_name'),
+                                          Text('Jumlah: $_amount'),
+                                          Text('Atk: $_atk'),
+                                          Text('Crit Rate: $_critRate'),
+                                          Text('Crit Dmg: $_critDmg'),
+                                          Text('Deskripsi: $_description')
+                                          
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      child: const Text('OK'),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                                    actions: [
+                                      TextButton(
+                                        child: const Text('OK'),
+                                        onPressed: () {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => MyHomePage()),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                    content:
+                                        Text("Terdapat kesalahan, silakan coba lagi."),
+                                ));
+                            }
                           }
-                          _formKey.currentState!.reset();
                         },
                         child: const Text(
                           "Save",
